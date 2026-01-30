@@ -53,34 +53,70 @@
             </svg>
         );
 
-        // Music library with royalty-free workout tracks
+        // Music library with your GitHub-hosted tracks
         const MUSIC_LIBRARY = {
-            'techno-house': {
-                name: 'Techno/House',
+            'house': {
+                name: 'House',
                 tracks: [
-                    'https://cdn.pixabay.com/audio/2022/05/13/audio_1ab3d6e3f9.mp3',
-                    'https://cdn.pixabay.com/audio/2022/03/10/audio_c9eb950444.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song1.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song2.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song3.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song4.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song5.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song6.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song7.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song8.mp3',
+                    'https://deottoni.github.io/wod-app/music/House/song9.mp3',
                 ]
             },
             'hip-hop': {
                 name: 'Hip Hop',
                 tracks: [
-                    'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe5c49c.mp3',
-                    'https://cdn.pixabay.com/audio/2022/03/24/audio_1b8c1e5a0e.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song1.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song2.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song3.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song4.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song5.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song6.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song7.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song8.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song9.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song10.mp3',
+                    'https://deottoni.github.io/wod-app/music/Hip%20Hop/song11.mp3',
                 ]
             },
-            'electronic-edm': {
-                name: 'Electronic/EDM',
+            'edm': {
+                name: 'EDM',
                 tracks: [
-                    'https://cdn.pixabay.com/audio/2022/03/22/audio_b041f9c8e7.mp3',
-                    'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song1.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song2.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song3.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song4.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song5.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song6.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song7.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song8.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song9.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song10.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song11.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song12.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song13.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song14.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song15.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song16.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song17.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song18.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song19.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song20.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song21.mp3',
+                    'https://deottoni.github.io/wod-app/music/EDM/song22.mp3',
                 ]
             }
         };
 
         function EMOMTimer() {
             const [totalMinutes, setTotalMinutes] = useState(10);
-            const [selectedPlaylist, setSelectedPlaylist] = useState('techno-house');
+            const [selectedPlaylist, setSelectedPlaylist] = useState('edm');
             const [isRunning, setIsRunning] = useState(false);
             const [timeRemaining, setTimeRemaining] = useState(600);
             const [currentMinute, setCurrentMinute] = useState(1);
@@ -91,8 +127,19 @@
             const intervalRef = useRef(null);
             const musicAudioRef = useRef(null);
             const currentTrackIndexRef = useRef(0);
+            const shuffledTracksRef = useRef([]);
             const hasSpokenHalfwayRef = useRef(false);
             const hasSpokenTenSecondsRef = useRef(false);
+
+            // Shuffle array function
+            const shuffleArray = (array) => {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            };
 
             useEffect(() => {
                 audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -115,11 +162,10 @@
             }, []);
 
             const playNextTrack = () => {
-                const playlist = MUSIC_LIBRARY[selectedPlaylist];
-                if (!playlist) return;
+                if (shuffledTracksRef.current.length === 0) return;
                 
-                currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % playlist.tracks.length;
-                musicAudioRef.current.src = playlist.tracks[currentTrackIndexRef.current];
+                currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % shuffledTracksRef.current.length;
+                musicAudioRef.current.src = shuffledTracksRef.current[currentTrackIndexRef.current];
                 musicAudioRef.current.play().catch(e => console.log('Audio play error:', e));
             };
 
@@ -128,8 +174,10 @@
                 const playlist = MUSIC_LIBRARY[selectedPlaylist];
                 if (!playlist) return;
                 
+                // Shuffle the tracks
+                shuffledTracksRef.current = shuffleArray(playlist.tracks);
                 currentTrackIndexRef.current = 0;
-                musicAudioRef.current.src = playlist.tracks[0];
+                musicAudioRef.current.src = shuffledTracksRef.current[0];
                 musicAudioRef.current.volume = 0.6;
                 musicAudioRef.current.play().catch(e => console.log('Audio play error:', e));
             };
