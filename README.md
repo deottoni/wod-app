@@ -2,7 +2,7 @@
 
 A modern, minimalist workout timer application designed for CrossFit and functional fitness workouts. Currently features EMOM (Every Minute On the Minute) timing with integrated music playback and voice callouts.
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://deotoni.github.io/wod-app)
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://deottoni.github.io/wod-app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
@@ -34,7 +34,7 @@ A modern, minimalist workout timer application designed for CrossFit and functio
 ## 🚀 Quick Start
 
 ### Live Demo
-Visit the live app: [https://deotoni.github.io/wod-app](https://deotoni.github.io/wod-app)
+Visit the live app: [https://deotoni.github.io/wod-app](https://deottoni.github.io/wod-app)
 
 ### Local Development
 1. Clone the repository:
@@ -114,7 +114,7 @@ Contributions are welcome! Here's how you can help:
 5. Open a Pull Request
 
 ### Roadmap & Feature Requests
-Check out the [Issues](https://github.com/deotoni/wod-app/issues) page for planned features and known issues. Feel free to suggest new features!
+Check out the [Issues](https://github.com/deottoni/wod-app/issues) page for planned features and known issues. Feel free to suggest new features!
 
 ## 📄 License
 
@@ -129,8 +129,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 Having issues or questions?
-- Open an [Issue](https://github.com/deotoni/wod-app/issues)
-- Check out [Discussions](https://github.com/deotoni/wod-app/discussions)
+- Open an [Issue](https://github.com/deottoni/wod-app/issues)
+- Check out [Discussions](https://github.com/deottoni/wod-app/discussions)
 
 ## 🔮 Future Plans
 
@@ -148,4 +148,4 @@ Having issues or questions?
 
 **Built with 💪 for the fitness community**
 
-[Report Bug](https://github.com/deotoni/wod-app/issues) · [Request Feature](https://github.com/deotoni/wod-app/issues) · [View Demo](https://deotoni.github.io/wod-app)
+[Report Bug](https://github.com/deottoni/wod-app/issues) · [Request Feature](https://github.com/deottoni/wod-app/issues) · [View Demo](https://deottoni.github.io/wod-app)
