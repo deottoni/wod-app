@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EMOM Timer - Workout timer app with music integration for EMOM, Tabata, and more">
+    <meta name="theme-color" content="#18181b">
+    <title>WOD Timer - EMOM</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Lucide React icons as inline SVGs
+        const Play = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+        );
+
+        const Pause = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+        );
+
+        const RotateCcw = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+        );
+
+        const Music = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+        );
+
+        // Music library with royalty-free workout tracks
+        const MUSIC_LIBRARY = {
+            'techno-house': {
+                name: 'Techno/House',
+                tracks: [
+                    'https://cdn.pixabay.com/audio/2022/05/13/audio_1ab3d6e3f9.mp3',
+                    'https://cdn.pixabay.com/audio/2022/03/10/audio_c9eb950444.mp3',
+                ]
+            },
+            'hip-hop': {
+                name: 'Hip Hop',
+                tracks: [
+                    'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe5c49c.mp3',
+                    'https://cdn.pixabay.com/audio/2022/03/24/audio_1b8c1e5a0e.mp3',
+                ]
+            },
+            'electronic-edm': {
+                name: 'Electronic/EDM',
+                tracks: [
+                    'https://cdn.pixabay.com/audio/2022/03/22/audio_b041f9c8e7.mp3',
+                    'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3',
+                ]
+            }
+        };
+
+        function EMOMTimer() {
+            const [totalMinutes, setTotalMinutes] = useState(10);
+            const [selectedPlaylist, setSelectedPlaylist] = useState('techno-house');
+            const [isRunning, setIsRunning] = useState(false);
+            const [timeRemaining, setTimeRemaining] = useState(600);
+            const [currentMinute, setCurrentMinute] = useState(1);
+            const [secondsInMinute, setSecondsInMinute] = useState(60);
+            const [showSettings, setShowSettings] = useState(true);
+            
+            const audioContextRef = useRef(null);
+            const intervalRef = useRef(null);
+            const musicAudioRef = useRef(null);
+            const currentTrackIndexRef = useRef(0);
+            const hasSpokenHalfwayRef = useRef(false);
+            const hasSpokenTenSecondsRef = useRef(false);
+
+            useEffect(() => {
+                audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                musicAudioRef.current = new Audio();
+                musicAudioRef.current.loop = false;
+                musicAudioRef.current.volume = 0.6;
+                
+                musicAudioRef.current.addEventListener('ended', () => {
+                    playNextTrack();
+                });
+                
+                return () => {
+                    if (audioContextRef.current) {
+                        audioContextRef.current.close();
+                    }
+                    if (musicAudioRef.current) {
+                        musicAudioRef.current.pause();
+                    }
+                };
+            }, []);
+
+            const playNextTrack = () => {
+                const playlist = MUSIC_LIBRARY[selectedPlaylist];
+                if (!playlist) return;
+                
+                currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % playlist.tracks.length;
+                musicAudioRef.current.src = playlist.tracks[currentTrackIndexRef.current];
+                musicAudioRef.current.play().catch(e => console.log('Audio play error:', e));
+            };
+
+            const startMusic = () => {
+                if (!musicAudioRef.current) return;
+                const playlist = MUSIC_LIBRARY[selectedPlaylist];
+                if (!playlist) return;
+                
+                currentTrackIndexRef.current = 0;
+                musicAudioRef.current.src = playlist.tracks[0];
+                musicAudioRef.current.volume = 0.6;
+                musicAudioRef.current.play().catch(e => console.log('Audio play error:', e));
+            };
+
+            const duckMusic = async (duration = 1000) => {
+                if (!musicAudioRef.current) return;
+                const originalVolume = musicAudioRef.current.volume;
+                
+                musicAudioRef.current.volume = 0.15;
+                await new Promise(resolve => setTimeout(resolve, duration));
+                musicAudioRef.current.volume = originalVolume;
+            };
+
+            const speak = async (text) => {
+                return new Promise((resolve) => {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.9;
+                    utterance.pitch = 0.8;
+                    utterance.volume = 1;
+                    
+                    const voices = speechSynthesis.getVoices();
+                    const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male')) 
+                                    || voices.find(v => v.lang.includes('en'));
+                    if (maleVoice) {
+                        utterance.voice = maleVoice;
+                    }
+                    
+                    utterance.onend = resolve;
+                    speechSynthesis.speak(utterance);
+                });
+            };
+
+            const playBeep = (frequency = 800, duration = 0.1) => {
+                if (!audioContextRef.current) return;
+                
+                const ctx = audioContextRef.current;
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + duration);
+            };
+
+            useEffect(() => {
+                if (isRunning && timeRemaining > 0) {
+                    intervalRef.current = setInterval(async () => {
+                        setTimeRemaining(prev => {
+                            const newTime = prev - 1;
+                            const newSecondsInMinute = ((newTime - 1) % 60) + 1;
+                            
+                            if (newSecondsInMinute === 30 && !hasSpokenHalfwayRef.current) {
+                                hasSpokenHalfwayRef.current = true;
+                                (async () => {
+                                    await duckMusic(2000);
+                                    await speak("Halfway");
+                                })();
+                            }
+                            
+                            if (newSecondsInMinute === 10 && !hasSpokenTenSecondsRef.current) {
+                                hasSpokenTenSecondsRef.current = true;
+                                (async () => {
+                                    await duckMusic(3000);
+                                    await speak("10 seconds remaining");
+                                })();
+                            }
+                            
+                            if (newSecondsInMinute <= 3 && newSecondsInMinute > 0) {
+                                duckMusic(500);
+                                playBeep(newSecondsInMinute === 1 ? 1000 : 800, 0.15);
+                            }
+                            
+                            if (newSecondsInMinute === 60) {
+                                setCurrentMinute(Math.floor((totalMinutes * 60 - newTime) / 60) + 1);
+                                hasSpokenHalfwayRef.current = false;
+                                hasSpokenTenSecondsRef.current = false;
+                            }
+                            
+                            setSecondsInMinute(newSecondsInMinute);
+                            return newTime;
+                        });
+                    }, 1000);
+                } else if (timeRemaining === 0) {
+                    setIsRunning(false);
+                    playBeep(1200, 0.5);
+                    if (musicAudioRef.current) {
+                        musicAudioRef.current.pause();
+                    }
+                }
+                
+                return () => {
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                    }
+                };
+            }, [isRunning, timeRemaining, totalMinutes]);
+
+            const handleStart = () => {
+                if (showSettings) {
+                    setShowSettings(false);
+                    setTimeRemaining(totalMinutes * 60);
+                    setCurrentMinute(1);
+                    setSecondsInMinute(60);
+                    hasSpokenHalfwayRef.current = false;
+                    hasSpokenTenSecondsRef.current = false;
+                    startMusic();
+                }
+                setIsRunning(true);
+            };
+
+            const handlePause = () => {
+                setIsRunning(false);
+                if (musicAudioRef.current) {
+                    musicAudioRef.current.pause();
+                }
+            };
+
+            const handleReset = () => {
+                setIsRunning(false);
+                setTimeRemaining(totalMinutes * 60);
+                setCurrentMinute(1);
+                setSecondsInMinute(60);
+                setShowSettings(true);
+                hasSpokenHalfwayRef.current = false;
+                hasSpokenTenSecondsRef.current = false;
+                if (musicAudioRef.current) {
+                    musicAudioRef.current.pause();
+                    musicAudioRef.current.currentTime = 0;
+                }
+            };
+
+            const circleProgress = (secondsInMinute / 60) * 100;
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-stone-900 to-neutral-950 flex items-center justify-center p-4 relative">
+                    <div className="w-full max-w-2xl">
+                        {showSettings ? (
+                            <div className="bg-gradient-to-br from-zinc-800/40 to-stone-900/40 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-zinc-700/50">
+                                <h1 className="text-4xl font-bold text-slate-300 mb-8 text-center tracking-wider" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8)'}}>EMOM TIMER</h1>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-slate-300/80 text-lg mb-3 font-medium">Total Rounds</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="60"
+                                            value={totalMinutes}
+                                            onChange={(e) => setTotalMinutes(Math.max(1, parseInt(e.target.value) || 1))}
+                                            className="w-full px-6 py-4 text-2xl bg-zinc-900/60 border-2 border-zinc-700/50 rounded-lg text-slate-300 placeholder-slate-300/30 focus:outline-none focus:border-zinc-600 focus:ring-2 focus:ring-zinc-600/50"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-slate-300/80 text-lg mb-3 font-medium flex items-center gap-2">
+                                            <Music size={20} />
+                                            Music Playlist
+                                        </label>
+                                        <select
+                                            value={selectedPlaylist}
+                                            onChange={(e) => setSelectedPlaylist(e.target.value)}
+                                            className="w-full px-6 py-4 text-lg bg-zinc-900/60 border-2 border-zinc-700/50 rounded-lg text-slate-300 focus:outline-none focus:border-zinc-600 focus:ring-2 focus:ring-zinc-600/50"
+                                        >
+                                            {Object.entries(MUSIC_LIBRARY).map(([key, playlist]) => (
+                                                <option key={key} value={key}>{playlist.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={handleStart}
+                                        className="w-full bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-600 hover:to-zinc-700 text-slate-200 py-5 rounded-lg text-xl font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-3 border border-zinc-900"
+                                    >
+                                        <Play size={28} />
+                                        Start Timer
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-gradient-to-br from-zinc-800/40 to-stone-900/40 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-zinc-700/50">
+                                <div className="text-center mb-8">
+                                    <div className="text-slate-400/60 text-sm uppercase tracking-widest mb-2 font-bold">Round</div>
+                                    <div className="text-7xl font-bold text-slate-300 tabular-nums" style={{textShadow: '3px 3px 6px rgba(0,0,0,0.9)'}}>
+                                        {currentMinute}
+                                    </div>
+                                    <div className="text-slate-400/50 text-lg mt-2 font-medium">
+                                        of {totalMinutes}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-center mb-8">
+                                    <div className="relative w-64 h-64">
+                                        <svg className="transform -rotate-90 w-64 h-64">
+                                            <circle
+                                                cx="128"
+                                                cy="128"
+                                                r="120"
+                                                stroke="currentColor"
+                                                strokeWidth="16"
+                                                fill="none"
+                                                className="text-zinc-800/80"
+                                            />
+                                            <circle
+                                                cx="128"
+                                                cy="128"
+                                                r="120"
+                                                stroke="currentColor"
+                                                strokeWidth="16"
+                                                fill="none"
+                                                strokeDasharray={`${2 * Math.PI * 120}`}
+                                                strokeDashoffset={`${2 * Math.PI * 120 * (1 - circleProgress / 100)}`}
+                                                className={`transition-all duration-1000 ${
+                                                    secondsInMinute <= 3 ? 'text-red-800' : 'text-zinc-500'
+                                                }`}
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                            <div className={`text-8xl font-bold tabular-nums transition-colors ${
+                                                secondsInMinute <= 3 ? 'text-red-600' : 'text-slate-300'
+                                            }`} style={{textShadow: '3px 3px 6px rgba(0,0,0,0.9)'}}>
+                                                {secondsInMinute}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4">
+                                    {!isRunning ? (
+                                        <button
+                                            onClick={handleStart}
+                                            className="flex-1 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-600 hover:to-zinc-700 text-slate-200 py-4 rounded-lg text-lg font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-zinc-900"
+                                        >
+                                            <Play size={24} />
+                                            Start
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={handlePause}
+                                            className="flex-1 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-600 hover:to-zinc-700 text-slate-200 py-4 rounded-lg text-lg font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-zinc-900"
+                                        >
+                                            <Pause size={24} />
+                                            Pause
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={handleReset}
+                                        className="flex-1 bg-zinc-800/60 hover:bg-zinc-700/60 text-slate-300 py-4 rounded-lg text-lg font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 border border-zinc-700/50"
+                                    >
+                                        <RotateCcw size={24} />
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<EMOMTimer />, document.getElementById('root'));
+    </script>
+</body>
+</html>
