@@ -34,12 +34,12 @@ A modern, minimalist workout timer application designed for CrossFit and functio
 ## 🚀 Quick Start
 
 ### Live Demo
-Visit the live app: [https://deotoni.github.io/wod-app](https://deottoni.github.io/wod-app)
+Visit the live app: [https://deottoni.github.io/wod-app](https://deottoni.github.io/wod-app)
 
 ### Local Development
 1. Clone the repository:
 ```bash
-git clone https://github.com/deotoni/wod-app.git
+git clone https://github.com/deottoni/wod-app.git
 cd wod-app
 ```
 
